@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"fileflow-ai/internal/ai"
@@ -100,6 +101,11 @@ func main() {
 			}
 		}
 		fmt.Println("Files moved sucessfully. \n")
+		os.Rename("./files/", "./trash/")
+		os.Mkdir("./files/", os.ModePerm)
 	}
+
 	fmt.Println("Organization completed.")
+	fmt.Println("Files are at -/result/.")
+	fmt.Println("Remaining folders or files are at -/trash/.")
 }

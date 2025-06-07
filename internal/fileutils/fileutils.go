@@ -23,5 +23,5 @@ func ListFiles() ([]string, error) {
 }
 
 func MoveFile(from string, to string) {
-	os.Rename("./files/"+from, "./files/"+to)
+	os.Rename("./files/"+from, "./result/"+to)
 }

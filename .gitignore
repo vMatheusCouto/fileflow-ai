@@ -2,6 +2,11 @@
 # Tests
 files/
 filesbackup/
+result/
+trash/
+
+# Result
+result/
 
 # Binaries for programs and plugins
 *.exe

@@ -6,7 +6,7 @@ import (
 )
 
 func CreateFolder(path string) error {
-	err := os.MkdirAll(string("./files"+path), os.ModePerm)
+	err := os.MkdirAll(string("./result"+path), os.ModePerm)
 	if err != nil {
 		fmt.Println(err)
 	}
