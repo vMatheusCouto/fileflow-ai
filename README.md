@@ -5,21 +5,25 @@
 
 ---
 
-## 🏗️ Project Structure
+## 💼 How it works
+**Instructions:** ¹Insert files into _files/_ (create it if necessary) → ²Run the program _(explained below)_ → ³It will output the result at _result/_, and the remaining empty folders or files that didn't moved right will be placed in _trash/_, so analyze the folder and delete it when necessary. → Organization done!
 
-```
-fileflow-ai/
-│
-├── internal/                # Program actions
-│   ├── ai/                   # AI functions
-│   ├── fileutils/            # File actions
-│   └── folderutils/          # Folder actions
-│
-├── cmd/                     # Entry point
-│
-├── go.mod                   # Go module definition
-├── go.sum                   # Dependencies
-```
+## 📋 Project Structure
+
+**cmd/** - Entry Point
+
+**internal/** - Program Actions
+- **ai/** - AI functions
+- **fileutils/** - File handling
+- **folderutils/** - Folder creation
+
+_extras_ ---------------------------------
+
+**files/** - Files input
+
+**result/** - Program output
+
+**trash/** - Remaining empty folders | files moved wrong
 
 ---
 
