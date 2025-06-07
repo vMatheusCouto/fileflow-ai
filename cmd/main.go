@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"fileflow-ai/internal/ai"
@@ -11,6 +13,7 @@ import (
 	"fileflow-ai/internal/folderutils"
 
 	"github.com/joho/godotenv"
+	"github.com/yarlson/pin"
 )
 
 type Folder struct {
@@ -28,7 +31,7 @@ type FoldersResponse struct {
 type FilesResponse map[string][]string
 
 func main() {
-	fmt.Println("Files organization started! \n")
+	fmt.Print("→ Files organization started! \n\n")
 	godotenv.Load(".env.local")
 
 	// Load files
@@ -38,13 +41,17 @@ func main() {
 		return
 	}
 
-	// Create folder structure
-	fmt.Println("Using AI to create folders structure...")
+	folderS := pin.New("Creating folder structure...",
+		pin.WithSpinnerColor(pin.ColorCyan),
+		pin.WithTextColor(pin.ColorYellow),
+	)
+	cancelFolderS := folderS.Start(context.Background())
+	defer cancelFolderS()
+
 	folderStructure, err := ai.CreateFolders(files)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Folders structure done.")
 
 	converted := strings.Replace(strings.Replace(folderStructure, "```json", "", -1), "```", "", -1)
 
@@ -57,7 +64,8 @@ func main() {
 	for _, folder := range foldersResp.Folders {
 		folderutils.CreateFolder(folder.Path)
 	}
-	fmt.Println("Directories created sucessfully. \n")
+	folderS.Stop("Created folders sucessfully!")
+	fmt.Print("\n")
 
 	// Group files (50 each)
 	newResponse := [][]string{}
@@ -73,12 +81,17 @@ func main() {
 	for j := range newResponse {
 
 		// Assign files
-		fmt.Println("Using AI to assign file group " + string(j+1) + "...")
+		message := "Assigning files " + strconv.Itoa(j+1) + "/" + strconv.Itoa(len(newResponse)) + "..."
+		filesA := pin.New(message,
+			pin.WithSpinnerColor(pin.ColorCyan),
+			pin.WithTextColor(pin.ColorYellow),
+		)
+		cancelFilesA := filesA.Start(context.Background())
+		defer cancelFilesA()
 		result, err := ai.AssignFiles(newResponse[j], folderStructure)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println("Files assigned sucessfully.")
 		converted2 := strings.Replace(strings.Replace(result, "```json", "", -1), "```", "", -1)
 
 		// Run files moving
@@ -87,7 +100,6 @@ func main() {
 		if err2 != nil {
 			fmt.Println(err2)
 		}
-		fmt.Println("Moving files to correct folder...")
 		for folderPath, files := range filesResp {
 			for _, file := range files {
 				filePath, has := strings.CutPrefix(file, "files/")
@@ -100,12 +112,13 @@ func main() {
 				fileutils.MoveFile(filePath, pathTo)
 			}
 		}
-		fmt.Println("Files moved sucessfully. \n")
-		os.Rename("./files/", "./trash/")
-		os.Mkdir("./files/", os.ModePerm)
+		filesA.Stop("Assigned files " + strconv.Itoa(j+1) + "/" + strconv.Itoa(len(newResponse)) + ".")
 	}
 
-	fmt.Println("Organization completed.")
-	fmt.Println("Files are at -/result/.")
-	fmt.Println("Remaining folders or files are at -/trash/.")
+	os.Rename("./files/", "./trash/")
+	os.Mkdir("./files/", os.ModePerm)
+	fmt.Print("\n")
+	fmt.Println("\033[31m" + "→" + "\033[0m" + "\033[34m" + " Sucessfully completed organization!")
+	fmt.Println("Files: result/")
+	fmt.Println("Remaining: trash/")
 }
