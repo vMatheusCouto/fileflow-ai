@@ -1,20 +1,27 @@
 package fileutils
 
 import (
+	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
-func ListFiles(path string) ([]string, error) {
-	var files []string
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		return nil, err
+func ListFiles() ([]string, error) {
+	var array = []string{}
+
+	visit := func(path string, di fs.DirEntry, err error) error {
+		newPath := strings.Replace(path, "../", "", -1)
+		array = append(array, newPath)
+		return nil
 	}
 
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			files = append(files, entry.Name())
-		}
-	}
+	filepath.WalkDir("./files/", visit)
+	files := array
+
 	return files, nil
+}
+
+func MoveFile(from string, to string) {
+	os.Rename("./files/"+from, "./files/"+to)
 }

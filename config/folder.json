@@ -1,11 +1,14 @@
 {
     "folders": {
-        "example": {
-            "name": "example",
-            "id": "01",
+        "1": {
+            "name": "example1",
             "description": "Small description of the folder",
-            "path": "/example/path",
-            "files": ["file1.txt", "file2.txt"]
+            "path": "/example1"
+        },
+        "2": {
+            "name": "example",
+            "description": "Small description of the folder",
+            "path": "/example1/example2"
         }
     }
 }

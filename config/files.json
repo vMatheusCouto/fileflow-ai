@@ -1,5 +1,5 @@
 {
-    "01": ["file1.txt", "file2.txt"],
-    "02": ["file3.png", "file4.png"],
-    "03": ["file5.pdf", "file6.pdf"]
+    "1": ["file1.txt", "file2.txt"],
+    "2": ["file3.png", "file4.png"],
+    "3": ["file5.pdf", "file6.pdf"]
 }
