@@ -28,7 +28,7 @@ type AIResponse struct {
 	Files   *FilesResponse
 }
 
-func CreateFolders(files []string) (string, error) {
+func CreateFolders(files []string, language string, category string) (string, error) {
 	// Folder template
 	folderConfig, errF := os.ReadFile("./config/folder.json")
 	if errF != nil {
@@ -54,13 +54,15 @@ func CreateFolders(files []string) (string, error) {
 	prompt := fmt.Sprintf(`
 	You are an expert in file management and organization.
 	TASK: Create a folder structure for those files: %v.
+	Use the language %s for folder naming.
 
 	Template for structurizing: %s
 	The maximum number of folders root folder can have is 8, so you may need to create subfolders (which you just add as another folder, only adapting the path). If there isnt too much files, you can create less than 8 root folders and also subfolders arent needed (but they can help a lot to organize).
+	Extra instructions: {%s} (if empty, just ignore)
 
 	Analyze file content/context (path, name, extension, files nearby, etc).
 	You should return ONLY a JSON object with the folder structure, based on ONLY the template.
-	`, files, string(folderConfig))
+	`, files, language, string(folderConfig), category)
 
 	result, err := client.Models.GenerateContent(
 		ctx,
