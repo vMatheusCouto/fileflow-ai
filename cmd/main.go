@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -33,6 +34,7 @@ type FilesResponse map[string][]string
 func main() {
 	fmt.Print("→ Files organization started! \n\n")
 	godotenv.Load(".env.local")
+	scanner := bufio.NewScanner(os.Stdin)
 
 	// Load files
 	files, err := fileutils.ListFiles()
@@ -41,6 +43,14 @@ func main() {
 		return
 	}
 
+	fmt.Print("Insert the language to be utilized → " + "\033[31m")
+	scanner.Scan()
+	language := scanner.Text()
+
+	fmt.Print("\033[30m" + "Extra instructions → " + "\033[31m")
+	scanner.Scan()
+	category := scanner.Text()
+
 	folderS := pin.New("Creating folder structure...",
 		pin.WithSpinnerColor(pin.ColorCyan),
 		pin.WithTextColor(pin.ColorYellow),
@@ -48,7 +58,7 @@ func main() {
 	cancelFolderS := folderS.Start(context.Background())
 	defer cancelFolderS()
 
-	folderStructure, err := ai.CreateFolders(files)
+	folderStructure, err := ai.CreateFolders(files, language, category)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -119,6 +129,6 @@ func main() {
 	os.Mkdir("./files/", os.ModePerm)
 	fmt.Print("\n")
 	fmt.Println("\033[31m" + "→" + "\033[0m" + "\033[34m" + " Sucessfully completed organization!")
-	fmt.Println("Files: result/")
-	fmt.Println("Remaining: trash/")
+	fmt.Println("\033[34m" + "Files: " + "\033[0m" + "result/")
+	fmt.Println("\033[34m" + "Remaining " + "\033[0m" + "trash/")
 }
