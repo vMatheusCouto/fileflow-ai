@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
+
+	"bufio"
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -37,11 +38,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	// Load files
-	files, err := fileutils.ListFiles()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	files := loadFiles()
 
 	fmt.Print("Insert the language to be utilized → " + "\033[31m")
 	scanner.Scan()
@@ -77,19 +74,48 @@ func main() {
 	folderS.Stop("Created folders sucessfully!")
 	fmt.Print("\n")
 
-	// Group files (50 each)
-	newResponse := [][]string{}
-	for i := 0; i < len(files); i += 50 {
-		end := i + 50
+	// Group files (10 each)
+	newResponse := groupFiles(files)
+
+	// Process each group of files
+	processFiles(newResponse, folderStructure, foldersResp)
+
+	// Check for remaining files (just for tests)
+	filesTry := loadFiles()
+	newResponseTry := groupFiles(filesTry)
+	processFiles(newResponseTry, folderStructure, foldersResp)
+
+	os.Rename("./files/", "./trash/")
+	os.Mkdir("./files/", os.ModePerm)
+	fmt.Print("\n")
+	fmt.Println("\033[31m" + "→" + "\033[0m" + "\033[34m" + " Sucessfully completed organization!")
+	fmt.Println("\033[34m" + "Files: " + "\033[0m" + "result/")
+	fmt.Println("\033[34m" + "Remaining: " + "\033[0m" + "trash/")
+}
+
+func groupFiles(files []string) (newResponse [][]string) {
+	newResponse = [][]string{}
+	for i := 0; i < len(files); i += 10 {
+		end := i + 10
 		if end > len(files) {
 			end = len(files)
 		}
 		newResponse = append(newResponse, files[i:end])
 	}
+	return newResponse
+}
 
-	// Process each group of files
+func loadFiles() []string {
+	files, err := fileutils.ListFiles()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return files
+}
+
+func processFiles(newResponse [][]string, folderStructure string, foldersResp FoldersResponse) {
 	for j := range newResponse {
-
 		// Assign files
 		message := "Assigning files " + strconv.Itoa(j+1) + "/" + strconv.Itoa(len(newResponse)) + "..."
 		filesA := pin.New(message,
@@ -108,7 +134,6 @@ func main() {
 		var filesResp FilesResponse
 		err2 := json.Unmarshal([]byte(converted2), &filesResp)
 		if err2 != nil {
-			fmt.Println(err2)
 		}
 		for folderPath, files := range filesResp {
 			for _, file := range files {
@@ -118,17 +143,12 @@ func main() {
 				length := strings.Split(filePath, "/")
 				name := length[len(length)-1]
 				pathTo := foldersResp.Folders[string(folderPath)].Path + "/" + name
-
-				fileutils.MoveFile(filePath, pathTo)
+				if strings.Contains(filePath, ".") {
+					fileutils.MoveFile(filePath, pathTo)
+				}
 			}
 		}
+		fmt.Println("--------------------------")
 		filesA.Stop("Assigned files " + strconv.Itoa(j+1) + "/" + strconv.Itoa(len(newResponse)) + ".")
 	}
-
-	os.Rename("./files/", "./trash/")
-	os.Mkdir("./files/", os.ModePerm)
-	fmt.Print("\n")
-	fmt.Println("\033[31m" + "→" + "\033[0m" + "\033[34m" + " Sucessfully completed organization!")
-	fmt.Println("\033[34m" + "Files: " + "\033[0m" + "result/")
-	fmt.Println("\033[34m" + "Remaining " + "\033[0m" + "trash/")
 }
